@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>autoComplete</title>
+<link rel="stylesheet" type="text/css" media="screen" href="./css/autoComplete.css">
+<link rel="stylesheet" type="text/css" media="screen" href="./css/main.css">
+<link rel="stylesheet" type="text/css" media="screen" href="./css/jquery-ui.css">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+  <!-- <div class="btnDelete">
+    <button class="delete">Delete <span>x</span></button>
+  </div> -->
+  <header class="header">
+    <h1> AutoComplete </h1>
+    <p>Search city by name:</p>
+  </header>
+  <div class="body" align="center">
+    <input id="autoComplete" type="text" tabindex="1">
+    <button id="search" onclick="searchFunction()">Search</button>
+    <div class="selection"></div>
+  </div>
+  <footer class="footer">
+    <div class="copyrights"> Copyright &copy; 2019 All Rights
+      Reserved </div>
+  </footer>
+</div>
+<script src="./js/jquery-1.js"></script> 
+<script src="./js/jquery-ui.js"></script> 
+<script>
+         $(function () {
+            var getData = function (request, response) {
+                $.getJSON(
+                    "http://gd.geobytes.com/AutoCompleteCity?callback=?&q=" + request.term,
+                    function (data) {
+                        response(data);
+                    });
+            };
+
+            var selectItem = function (event, ui) {
+                $("#autoComplete").val(ui.item.value);
+            }
+
+            $("#autoComplete").autocomplete({
+                source: getData,
+                select: selectItem
+            });
+       });
+var recentSearches = [];
+function searchFunction(data) {
+var d = new Date();
+var e = formatDate(d);
+    var obj = {
+    'timestamp': e,
+    'searchdata': $('#autoComplete').val()
+}
+if($('#autoComplete').val() != ''){ recentSearches.push(obj);}
+   
+    $('#autoComplete').val(""); 
+    $('.selection').text(""); 
+     console.log(recentSearches);
+	 if(recentSearches.length > 0)
+	   $('.selection').append("<div class='selectionheader'><h3> Search History</h3><a href='#' onclick='removeAll()'>Clear Search History</a></div>");
+   for (var i = 0; i < recentSearches.length; i++) {
+	   var value = recentSearches[i].searchdata;
+        $('.selection').append("<li class='historyItem'><span class='itemtext' onclick='addtotextbox("+i+")'>" + value + "</span><span class='itemcross' onclick='removethis("+i+")'>X</span><span class='timestamp'>" + recentSearches[i].timestamp + "</span></li>");
+   }
+}
+function formatDate(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return date.getFullYear() + "-" + date.getMonth()+1 + "-" + date.getDate()  +  "  " + strTime;
+}
+
+function addtotextbox(id)
+{
+$('#autoComplete').val(recentSearches[id].searchdata);
+} 
+
+function removethis(id)
+{
+ recentSearches.splice( id, 1); 
+ searchFunction();
+} 
+function removeAll()
+{
+ recentSearches = []; 
+ searchFunction();
+} 
+
+</script>
+</body>
+</html>
